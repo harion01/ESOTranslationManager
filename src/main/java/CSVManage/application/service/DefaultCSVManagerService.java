@@ -2,19 +2,22 @@ package CSVManage.application.service;
 
 import CSVManage.application.port.in.CSVManageService;
 import CSVManage.domain.model.CSVModel;
+import com.opencsv.*;
 
 
+import java.io.FileReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class DefaultCSVManagerService implements CSVManageService {
-    public static final Pattern CSVPattern = Pattern.compile("\"()()(([\\d]+?)-([\\d]+?)-([\\d]+?))\",\"([\\s\\S]*?)\",\"([\\s\\S]*?)\"(\\r\\n|\\r|\\n)", Pattern.MULTILINE);
+    public static final Pattern CSVPattern = Pattern.compile("\"()(([\\d]+?)-([\\d]+?)-([\\d]+?))\",\"([\\s\\S]*?)\",\"([\\s\\S]*?)\"(\\r\\n|\\r|\\n)", Pattern.MULTILINE);
     public static final Charset UTF8 = StandardCharsets.UTF_8;
 
     public String KRToCN(String string) {
@@ -39,15 +42,15 @@ public class DefaultCSVManagerService implements CSVManageService {
     public List<CSVModel> parseCSVFile(String filename) throws Exception{
         List<CSVModel> result = new ArrayList<>();
         List<String> lines = Files.readAllLines(Paths.get(filename));
-        for(String oneLine : lines){
-            Matcher m = CSVPattern.matcher(oneLine);
-            if(m.find()){
-                CSVModel oneCsv = new CSVModel(m.group(3), m.group(7), m.group(8));
-                result.add(oneCsv);
-            }else {
-                System.out.println("no csv pattern found ["+oneLine+"]");
-            }
+
+        CSVReaderHeaderAware parser = new CSVReaderHeaderAware(new FileReader(filename));
+        String[] item = parser.readNext();
+        while (item != null) {
+            CSVModel oneCsv = new CSVModel(item[0], item[1], item[2]);
+            result.add(oneCsv);
+            item = parser.readNext();
         }
+
         return result;
     }
 

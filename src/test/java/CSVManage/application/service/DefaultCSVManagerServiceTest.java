@@ -15,7 +15,7 @@ class DefaultCSVManagerServiceTest {
     public static DefaultCSVManagerService service;
 
     @BeforeAll
-    void init(){
+    static void init(){
         service = new DefaultCSVManagerService();
     }
 
@@ -26,10 +26,10 @@ class DefaultCSVManagerServiceTest {
 
     @Test
     void parseCSVFile() throws Exception {
-        String filename = "test";
+        String filename = "src/test/resources/en_small.lang.csv";
         List<CSVModel> parsedList = service.parseCSVFile(filename);
         List<String> lines = Files.readAllLines(Paths.get(filename));
-        assertEquals( lines.size(), parsedList.size());
+        assertEquals( lines.size()-1, parsedList.size());
     }
 
     @Test
